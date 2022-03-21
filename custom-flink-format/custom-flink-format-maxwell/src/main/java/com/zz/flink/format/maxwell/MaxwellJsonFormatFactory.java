@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-package com.zz.flinkjob.maxwell;
+package com.zz.flink.format.maxwell;
 
 import org.apache.flink.annotation.Internal;
 import org.apache.flink.api.common.serialization.DeserializationSchema;
@@ -43,12 +43,6 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-import static org.apache.flink.formats.json.JsonFormatOptions.ENCODE_DECIMAL_AS_PLAIN_NUMBER;
-import static org.apache.flink.formats.json.maxwell.MaxwellJsonFormatOptions.IGNORE_PARSE_ERRORS;
-import static org.apache.flink.formats.json.maxwell.MaxwellJsonFormatOptions.JSON_MAP_NULL_KEY_LITERAL;
-import static org.apache.flink.formats.json.maxwell.MaxwellJsonFormatOptions.JSON_MAP_NULL_KEY_MODE;
-import static org.apache.flink.formats.json.maxwell.MaxwellJsonFormatOptions.TIMESTAMP_FORMAT;
-
 /**
  * Format factory for providing configured instances of Maxwell JSON to RowData {@link
  * DeserializationSchema}.
@@ -65,7 +59,7 @@ public class MaxwellJsonFormatFactory
         FactoryUtil.validateFactoryOptions(this, formatOptions);
         validateDecodingFormatOptions(formatOptions);
 
-        final boolean ignoreParseErrors = formatOptions.get(IGNORE_PARSE_ERRORS);
+        final boolean ignoreParseErrors = formatOptions.get(MaxwellJsonFormatOptions.IGNORE_PARSE_ERRORS);
         final TimestampFormat timestampFormat =
                 JsonFormatOptionsUtil.getTimestampFormat(formatOptions);
 
@@ -81,10 +75,10 @@ public class MaxwellJsonFormatFactory
         TimestampFormat timestampFormat = JsonFormatOptionsUtil.getTimestampFormat(formatOptions);
         JsonFormatOptions.MapNullKeyMode mapNullKeyMode =
                 JsonFormatOptionsUtil.getMapNullKeyMode(formatOptions);
-        String mapNullKeyLiteral = formatOptions.get(JSON_MAP_NULL_KEY_LITERAL);
+        String mapNullKeyLiteral = formatOptions.get(MaxwellJsonFormatOptions.JSON_MAP_NULL_KEY_LITERAL);
 
         final boolean encodeDecimalAsPlainNumber =
-                formatOptions.get(ENCODE_DECIMAL_AS_PLAIN_NUMBER);
+                formatOptions.get(JsonFormatOptions.ENCODE_DECIMAL_AS_PLAIN_NUMBER);
 
         return new EncodingFormat<SerializationSchema<RowData>>() {
 
@@ -125,11 +119,11 @@ public class MaxwellJsonFormatFactory
     @Override
     public Set<ConfigOption<?>> optionalOptions() {
         Set<ConfigOption<?>> options = new HashSet<>();
-        options.add(IGNORE_PARSE_ERRORS);
-        options.add(TIMESTAMP_FORMAT);
-        options.add(JSON_MAP_NULL_KEY_MODE);
-        options.add(JSON_MAP_NULL_KEY_LITERAL);
-        options.add(ENCODE_DECIMAL_AS_PLAIN_NUMBER);
+        options.add(MaxwellJsonFormatOptions.IGNORE_PARSE_ERRORS);
+        options.add(MaxwellJsonFormatOptions.TIMESTAMP_FORMAT);
+        options.add(MaxwellJsonFormatOptions.JSON_MAP_NULL_KEY_MODE);
+        options.add(MaxwellJsonFormatOptions.JSON_MAP_NULL_KEY_LITERAL);
+        options.add(JsonFormatOptions.ENCODE_DECIMAL_AS_PLAIN_NUMBER);
         return options;
     }
 

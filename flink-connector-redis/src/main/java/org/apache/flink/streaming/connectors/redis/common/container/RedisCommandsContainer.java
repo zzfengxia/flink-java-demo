@@ -44,7 +44,9 @@ public interface RedisCommandsContainer extends Serializable {
      */
     void hset(String key, String hashField, String value, Integer ttl);
 
-    void hincrBy(String key, String hashField, Long value, Integer ttl);
+    long hincrBy(String key, String hashField, Long value, Integer ttl);
+
+    Double hincrByFloat(final String key, final String hashField, final Double value, final Integer ttl);
 
     /**
      * Insert the specified value at the tail of the list stored at key.
@@ -104,6 +106,13 @@ public interface RedisCommandsContainer extends Serializable {
     void setex(String key, String value, Integer ttl);
 
     /**
+     * Get the value of key. If the key does not exist the special value nil is returned.
+     *
+     * @param key the key name to get
+     */
+    String get(String key);
+
+    /**
      * Adds all the element arguments to the HyperLogLog data structure
      * stored at the variable name specified as first argument.
      *
@@ -145,7 +154,7 @@ public interface RedisCommandsContainer extends Serializable {
      * @param value the value
      * @param ttl time to live (TTL)
      */
-    void incrByEx(String key, Long value, Integer ttl);
+    Long incrByEx(String key, Long value, Integer ttl);
 
     /**
      * decrease value from specified key and expire the key.
@@ -175,4 +184,26 @@ public interface RedisCommandsContainer extends Serializable {
      * @throws IOException if the instance can not be closed properly
      */
     void close() throws IOException;
+
+    void setbit(String key, long offset, boolean value);
+
+    boolean getbit(String key, long offset);
+
+    String hget(String key, String field);
+
+    void hdel(String key, String field);
+
+    boolean exists(String key);
+
+    Long expire(String key, int seconds);
+
+    boolean sismember(String key, String member);
+
+    long scard(String key);
+
+    boolean hexists(String key, String field);
+
+    void srem(String setName, String value);
+
+    long incrByLong(String key, long value);
 }

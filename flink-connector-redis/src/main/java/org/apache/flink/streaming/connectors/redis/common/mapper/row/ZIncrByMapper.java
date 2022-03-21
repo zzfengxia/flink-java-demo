@@ -18,6 +18,7 @@
 package org.apache.flink.streaming.connectors.redis.common.mapper.row;
 
 
+import org.apache.flink.configuration.ReadableConfig;
 import org.apache.flink.streaming.connectors.redis.common.mapper.RedisCommand;
 
 /**
@@ -25,7 +26,12 @@ import org.apache.flink.streaming.connectors.redis.common.mapper.RedisCommand;
  */
 public class ZIncrByMapper extends RowRedisMapper {
 
+
     public ZIncrByMapper() {
         super(RedisCommand.ZINCRBY);
+    }
+
+    public ZIncrByMapper(ReadableConfig config) {
+        super(RedisCommand.ZINCRBY, config);
     }
 }

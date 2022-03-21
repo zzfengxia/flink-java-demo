@@ -14,42 +14,34 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.apache.flink.streaming.connectors.redis.common.config.handler;
 
+import org.apache.flink.calcite.shaded.com.google.common.base.Preconditions;
 import org.apache.flink.configuration.ReadableConfig;
-import org.apache.flink.streaming.connectors.redis.common.config.FlinkJedisClusterConfig;
 import org.apache.flink.streaming.connectors.redis.common.config.FlinkJedisConfigBase;
+import org.apache.flink.streaming.connectors.redis.common.config.FlinkJedisPoolConfig;
 import org.apache.flink.streaming.connectors.redis.common.config.RedisConnectorOptions;
 import org.apache.flink.streaming.connectors.redis.common.hanlder.FlinkJedisConfigHandler;
-import org.apache.flink.util.Preconditions;
 
-import java.net.InetSocketAddress;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
 
-import static org.apache.flink.streaming.connectors.redis.descriptor.RedisValidator.REDIS_CLUSTER;
 import static org.apache.flink.streaming.connectors.redis.descriptor.RedisValidator.REDIS_MODE;
+import static org.apache.flink.streaming.connectors.redis.descriptor.RedisValidator.REDIS_SINGLE;
 
-/**
- * jedis cluster config handler to find and create jedis cluster config use meta.
- */
-public class FlinkJedisClusterConfigHandler implements FlinkJedisConfigHandler {
+public class FlinkJedisSingleConfigHandler implements FlinkJedisConfigHandler {
 
     @Override
     public FlinkJedisConfigBase createFlinkJedisConfig(ReadableConfig config) {
-        String nodesInfo = config.get(RedisConnectorOptions.CLUSTERNODES);
-        Preconditions.checkNotNull(nodesInfo, "nodes should not be null in cluster mode");
-         Set<InetSocketAddress> nodes = Arrays.asList(nodesInfo.split(",")).stream().map(r -> {
-            String[] arr = r.split(":");
-            return new InetSocketAddress(arr[0].trim(), Integer.parseInt(arr[1].trim()));
-        }).collect(Collectors.toSet());
+        String host = config.get(RedisConnectorOptions.HOST);
+        int port = config.get(RedisConnectorOptions.PORT);
+        Preconditions.checkNotNull(host, "host should not be null in sentinel mode");
 
-        FlinkJedisClusterConfig.Builder builder = new FlinkJedisClusterConfig.Builder()
-                .setNodes(nodes).setPassword(config.get(RedisConnectorOptions.PASSWORD));
+        String password = config.get(RedisConnectorOptions.PASSWORD);
 
+        FlinkJedisPoolConfig.Builder builder =  new FlinkJedisPoolConfig.Builder().setHost(host).setPassword(password);
+        builder.setPort(config.get(RedisConnectorOptions.PORT));
         builder.setMaxIdle(config.get(RedisConnectorOptions.MAXIDLE)).setMinIdle(config.get(RedisConnectorOptions.MINIDLE)).setMaxTotal(config.get(RedisConnectorOptions.MAXTOTAL)).setTimeout(config.get(RedisConnectorOptions.TIMEOUT));
 
         return builder.build();
@@ -58,10 +50,11 @@ public class FlinkJedisClusterConfigHandler implements FlinkJedisConfigHandler {
     @Override
     public Map<String, String> requiredContext() {
         Map<String, String> require = new HashMap<>();
-        require.put(REDIS_MODE, REDIS_CLUSTER);
+        require.put(REDIS_MODE, REDIS_SINGLE);
         return require;
     }
 
-    public FlinkJedisClusterConfigHandler() {
+    public FlinkJedisSingleConfigHandler() {
+
     }
 }

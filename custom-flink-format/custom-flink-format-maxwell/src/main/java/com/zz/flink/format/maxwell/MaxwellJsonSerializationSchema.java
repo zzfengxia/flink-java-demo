@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-package com.zz.flinkjob.maxwell;
+package com.zz.flink.format.maxwell;
 
 import org.apache.flink.api.common.serialization.SerializationSchema;
 import org.apache.flink.formats.common.TimestampFormat;
@@ -28,6 +28,7 @@ import org.apache.flink.table.data.RowData;
 import org.apache.flink.table.data.StringData;
 import org.apache.flink.table.types.DataType;
 import org.apache.flink.table.types.logical.RowType;
+import org.apache.flink.table.types.utils.TypeConversions;
 import org.apache.flink.types.RowKind;
 
 import java.util.Objects;
@@ -59,7 +60,7 @@ public class MaxwellJsonSerializationSchema implements SerializationSchema<RowDa
             boolean encodeDecimalAsPlainNumber) {
         this.jsonSerializer =
                 new JsonRowDataSerializationSchema(
-                        createJsonRowType(fromLogicalToDataType(rowType)),
+                        createJsonRowType(TypeConversions.fromLogicalToDataType(rowType)),
                         timestampFormat,
                         mapNullKeyMode,
                         mapNullKeyLiteral,

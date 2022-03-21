@@ -17,6 +17,7 @@
 
 package org.apache.flink.streaming.connectors.redis.common.mapper.row;
 
+import org.apache.flink.configuration.ReadableConfig;
 import org.apache.flink.streaming.connectors.redis.common.mapper.RedisCommand;
 
 /**
@@ -24,8 +25,13 @@ import org.apache.flink.streaming.connectors.redis.common.mapper.RedisCommand;
  */
 public class IncrByMapper extends RowRedisMapper {
 
+
     public IncrByMapper() {
         super(RedisCommand.INCRBY);
+    }
+
+    public IncrByMapper(ReadableConfig config) {
+        super(RedisCommand.INCRBY, config);
     }
 
 }

@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-package com.zz.flinkjob.maxwell;
+package com.zz.flink.format.maxwell;
 
 import org.apache.flink.annotation.PublicEvolving;
 import org.apache.flink.configuration.ConfigOption;

@@ -1,92 +1,110 @@
-/*
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package org.apache.flink.streaming.connectors.redis.common.mapper.row;
 
-import org.apache.flink.api.java.tuple.Tuple2;
+import org.apache.flink.configuration.ReadableConfig;
+import org.apache.flink.streaming.connectors.redis.common.config.RedisConnectorOptions;
 import org.apache.flink.streaming.connectors.redis.common.hanlder.RedisMapperHandler;
 import org.apache.flink.streaming.connectors.redis.common.mapper.RedisCommand;
 import org.apache.flink.streaming.connectors.redis.common.mapper.RedisCommandDescription;
 import org.apache.flink.streaming.connectors.redis.common.mapper.RedisMapper;
-import org.apache.flink.types.Row;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.flink.table.data.GenericRowData;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 
 import static org.apache.flink.streaming.connectors.redis.descriptor.RedisValidator.REDIS_COMMAND;
 
 /**
  * base row redis mapper implement.
  */
-public abstract class RowRedisMapper implements RedisMapper<Tuple2<Boolean, Row>>, RedisMapperHandler {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(RowRedisMapper.class);
+public abstract class RowRedisMapper implements RedisMapper<GenericRowData>, RedisMapperHandler {
 
     private Integer ttl;
 
     private RedisCommand redisCommand;
 
-    public Integer getTtl() {
-        return ttl;
-    }
+    private String fieldColumn;
 
-    public void setTtl(int ttl) {
-        this.ttl = ttl;
-    }
+    private String keyColumn;
 
-    public RedisCommand getRedisCommand() {
-        return redisCommand;
-    }
+    private String valueColumn;
 
-    public void setRedisCommand(RedisCommand redisCommand) {
-        this.redisCommand = redisCommand;
-    }
+    private boolean putIfAbsent;
 
-    public RowRedisMapper() {
-    }
+    private String additionalKey;
 
-    public RowRedisMapper(int ttl, RedisCommand redisCommand) {
+    private Integer cacheMaxRows;
+
+    private Integer cacheTtlSec;
+
+    public RowRedisMapper(int ttl, RedisCommand redisCommand, String keyColumn, String valueColumn, boolean putIfAbsent) {
         this.ttl = ttl;
         this.redisCommand = redisCommand;
+        this.keyColumn = keyColumn;
+        this.valueColumn = valueColumn;
+        this.putIfAbsent = putIfAbsent;
     }
 
-    public RowRedisMapper(RedisCommand redisCommand) {
+    public RowRedisMapper(RedisCommand redisCommand,  String keyColumn, String fieldColumn, String valueColumn, boolean putIfAbsent, int ttl){
+        this.ttl = ttl;
         this.redisCommand = redisCommand;
+        this.keyColumn = keyColumn;
+        this.fieldColumn = fieldColumn;
+        this.valueColumn = valueColumn;
+        this.putIfAbsent = putIfAbsent;
+    }
+
+    public RowRedisMapper(RedisCommand redisCommand){
+        this.redisCommand = redisCommand;
+    }
+
+    public RowRedisMapper(RedisCommand redisCommand, Map<String, String> config){
+        this.redisCommand = redisCommand;
+    }
+
+    public RowRedisMapper(RedisCommand redisCommand, ReadableConfig config){
+        this.redisCommand = redisCommand;
+        this.ttl = config.get(RedisConnectorOptions.TTL);
+        this.valueColumn = config.get(RedisConnectorOptions.VALUE_COLUMN);
+        this.keyColumn = config.get(RedisConnectorOptions.KEY_COLUMN);
+        this.fieldColumn = config.get(RedisConnectorOptions.FIELD_COLUMN);
+        this.putIfAbsent = config.get(RedisConnectorOptions.PUT_IF_ABSENT);
+        this.additionalKey = config.get(RedisConnectorOptions.LOOKUP_ADDITIONAL_KEY);
+        this.cacheMaxRows = config.get(RedisConnectorOptions.LOOKUP_CACHE_MAX_ROWS);
+        this.cacheTtlSec = config.get(RedisConnectorOptions.LOOKUP_CACHE_TTL_SEC);
     }
 
     @Override
     public RedisCommandDescription getCommandDescription() {
-        if (ttl != null) {
-            return new RedisCommandDescription(redisCommand, ttl);
-        }
-        return new RedisCommandDescription(redisCommand);
+        return new RedisCommandDescription(
+                                           redisCommand,
+                                           ttl,
+                                           keyColumn,
+                                           fieldColumn,
+                                           valueColumn,
+                                           putIfAbsent,
+                                           additionalKey,
+                                           cacheMaxRows,
+                                           cacheTtlSec
+                                           );
     }
 
     @Override
-    public String getKeyFromData(Tuple2<Boolean, Row> data) {
-        return data.f1.getField(0).toString();
+    public String getKeyFromData(GenericRowData row, Integer keyIndex) {
+        return String.valueOf(row.getField(keyIndex));
     }
 
     @Override
-    public String getValueFromData(Tuple2<Boolean, Row> data) {
-        return data.f1.getField(1).toString();
+    public String getValueFromData(GenericRowData row,  Integer valueIndex) {
+        return String.valueOf(row.getField(valueIndex));
+    }
+
+    @Override
+    public String getFieldFromData(GenericRowData row, Integer fieldIndex) {
+        return String.valueOf(row.getField(fieldIndex));
+    }
+
+    public RedisCommand getRedisCommand() {
+        return redisCommand;
     }
 
     @Override
@@ -102,8 +120,4 @@ public abstract class RowRedisMapper implements RedisMapper<Tuple2<Boolean, Row>
         return this.redisCommand == redisCommand;
     }
 
-    @Override
-    public Optional<Integer> getAdditionalTTL(Tuple2<Boolean, Row> data) {
-        return Optional.ofNullable(getTtl());
-    }
 }

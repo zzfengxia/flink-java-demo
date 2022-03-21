@@ -17,6 +17,7 @@
 
 package org.apache.flink.streaming.connectors.redis.common.mapper.row;
 
+import org.apache.flink.configuration.ReadableConfig;
 import org.apache.flink.streaming.connectors.redis.common.mapper.RedisCommand;
 
 /**
@@ -26,6 +27,10 @@ public class SetMapper extends RowRedisMapper {
 
     public SetMapper() {
         super(RedisCommand.SET);
+    }
+
+    public SetMapper(ReadableConfig config) {
+        super(RedisCommand.SET, config);
     }
 
 }

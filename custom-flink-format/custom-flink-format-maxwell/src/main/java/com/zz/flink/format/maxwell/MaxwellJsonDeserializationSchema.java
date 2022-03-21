@@ -16,9 +16,9 @@
  * limitations under the License.
  */
 
-package com.zz.flinkjob.maxwell;
+package com.zz.flink.format.maxwell;
 
-import com.zz.flinkjob.maxwell.MaxwellJsonDecodingFormat.ReadableMetadata;
+import com.zz.flink.format.maxwell.MaxwellJsonDecodingFormat.ReadableMetadata;
 import org.apache.flink.api.common.serialization.DeserializationSchema;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.formats.common.TimestampFormat;
@@ -27,6 +27,7 @@ import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.JsonNode;
 import org.apache.flink.table.api.DataTypes;
 import org.apache.flink.table.data.GenericRowData;
 import org.apache.flink.table.data.RowData;
+import org.apache.flink.table.data.binary.BinaryStringData;
 import org.apache.flink.table.types.DataType;
 import org.apache.flink.table.types.logical.RowType;
 import org.apache.flink.table.types.utils.DataTypeUtils;
@@ -124,6 +125,15 @@ public class MaxwellJsonDeserializationSchema implements DeserializationSchema<R
             final GenericRowData row = (GenericRowData) jsonDeserializer.convertToRowData(root);
             // user-def 增加type元数据的获取，这里索引由2变成3
             String type = row.getString(3).toString(); // "type" field
+            // maxwell导入存量数据，类型会添加“bootstrap-”前缀
+            /*if(type.contains("bootstrap-")) {
+                type = type.substring(type.indexOf("bootstrap-") + "bootstrap-".length());
+            }
+            // 替换原类型
+            row.setField(3, BinaryStringData.fromString(type));
+            if("start".equals(type) || "complete".equals(type)) {
+                return;
+            }*/
             if (OP_INSERT.equals(type)) {
                 // "data" field is a row, contains inserted rows
                 GenericRowData insert = (GenericRowData) row.getRow(0, fieldCount);

@@ -76,9 +76,9 @@ public class TableMysqlJob {
 
         tEnv.executeSql(CREATE_CARD_CODE_DICT_TBL);
         tEnv.executeSql(SOURCE_KAFKA_USERINFO);
-        tEnv.executeSql("select * from card_code_dict_source").print();
+        tEnv.executeSql("select HEX(10),CAST(`id` AS STRING),* from card_code_dict_source").print();
 
         // 关联查询，转义字段
-        tEnv.executeSql("select b.user_id, a.card_desc from card_code_dict_source a left join user_info_source2 b on a.card_external_code = b.user_id").print();
+        tEnv.executeSql("select HEX('00001388'), b.user_id, a.card_desc from card_code_dict_source a left join user_info_source2 b on a.card_external_code = b.user_id").print();
     }
 }

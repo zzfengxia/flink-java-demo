@@ -29,14 +29,15 @@ public class UserTableJob {
             "  `se_chip_manufacturer` STRING,\n" +
             "  `last_opt_time` TIMESTAMP(0),\n" +
             "  `create_time` TIMESTAMP(0),\n" +
-            "  `update_time` TIMESTAMP(0),\n" +
-            "  PRIMARY KEY (`sp_user_id`) NOT ENFORCED\n" +
+            "  `update_time` TIMESTAMP(0)\n" +
             ") with (\n" +
             "'connector' = 'kafka',\n" +
-            "'topic' = 'maxwell',\n" +
+            "'topic' = 'test-user_info',\n" +
             "'properties.group.id' = 'maxwell-test',\n" +
             // 默认值group-offsets，从消费者组中记录的offset开始
             //"'scan.startup.mode' = 'group-offsets',\n" +
+            "'scan.startup.mode' = 'earliest-offset',\n" +
+            //"'scan.startup.specific-offsets' = 'partition:0,offset:9040',\n" +
             "'properties.bootstrap.servers' = '172.16.80.133:9092',\n" +
             "'format' = 'custom-maxwell-json'\n" +
             ")";
@@ -88,7 +89,8 @@ public class UserTableJob {
             " `device_model` as `mobile_type`,\n" +
             " '' as `os_ver`,\n" +
             " '' as `login_ip`\n" +
-            "FROM user_info_source";
+            "FROM user_info_source\n" +
+            "where `sp_user_id` <> ''";
 
     public static void main(String[] args) throws Exception {
         StreamExecutionEnvironment bsEnv = StreamExecutionEnvironment.getExecutionEnvironment();

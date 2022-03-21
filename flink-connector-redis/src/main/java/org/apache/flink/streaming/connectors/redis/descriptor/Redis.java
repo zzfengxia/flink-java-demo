@@ -17,32 +17,37 @@
 
 package org.apache.flink.streaming.connectors.redis.descriptor;
 
-import org.apache.flink.table.descriptors.ConnectorDescriptorValidator;
-import org.apache.flink.table.descriptors.DescriptorProperties;
+import org.apache.flink.table.descriptors.ConnectorDescriptor;
 import org.apache.flink.util.Preconditions;
 
-import static org.apache.flink.streaming.connectors.redis.descriptor.RedisValidator.*;
+import java.util.HashMap;
+import java.util.Map;
+
+import static org.apache.flink.streaming.connectors.redis.descriptor.RedisValidator.REDIS;
+import static org.apache.flink.streaming.connectors.redis.descriptor.RedisValidator.REDIS_CLUSTER;
+import static org.apache.flink.streaming.connectors.redis.descriptor.RedisValidator.REDIS_COMMAND;
+import static org.apache.flink.streaming.connectors.redis.descriptor.RedisValidator.REDIS_MASTER_NAME;
+import static org.apache.flink.streaming.connectors.redis.descriptor.RedisValidator.REDIS_MODE;
+import static org.apache.flink.streaming.connectors.redis.descriptor.RedisValidator.REDIS_NODES;
+import static org.apache.flink.streaming.connectors.redis.descriptor.RedisValidator.REDIS_SENTINEL;
 
 /**
  * redis descriptor for create redis connector.
  */
-public class Redis extends ConnectorDescriptorValidator {
+public class Redis extends ConnectorDescriptor {
 
-    private final DescriptorProperties properties;
+    Map<String, String> properties = new HashMap<>();
 
     private String mode = null;
     private String redisCommand = null;
     private Integer ttl;
 
-    public Redis(String type, int version) {
-        super();
-        properties = new DescriptorProperties();
-        properties.putString("connector.type", type);
-        properties.putInt("connector.property-version", version);
+    public Redis(String type, int version, boolean formatNeeded) {
+        super(REDIS, version, formatNeeded);
     }
 
     public Redis() {
-        this(REDIS, 1);
+        this(REDIS, 1, false);
     }
 
     /**
@@ -52,18 +57,7 @@ public class Redis extends ConnectorDescriptorValidator {
      */
     public Redis command(String redisCommand) {
         this.redisCommand = redisCommand;
-        properties.putString(REDIS_COMMAND, redisCommand);
-        return this;
-    }
-
-    /**
-     * ttl for specified key.
-     * @param ttl time for key.
-     * @return this descriptor
-     */
-    public Redis ttl(Integer ttl) {
-        this.ttl = ttl;
-        properties.putInt(REDIS_KEY_TTL, ttl);
+            properties.put(REDIS_COMMAND, redisCommand);
         return this;
     }
 
@@ -74,7 +68,7 @@ public class Redis extends ConnectorDescriptorValidator {
      */
     public Redis mode(String mode) {
         this.mode = mode;
-        properties.putString(REDIS_MODE, mode);
+        properties.put(REDIS_MODE, mode);
         return this;
     }
 
@@ -85,8 +79,14 @@ public class Redis extends ConnectorDescriptorValidator {
      * @return this descriptor
      */
     public Redis property(String k, String v) {
-        properties.putString(k, v);
+        properties.put(k, v);
         return this;
+    }
+
+    @Override
+    protected Map<String, String> toConnectorProperties() {
+        validate();
+        return properties;
     }
 
     /**

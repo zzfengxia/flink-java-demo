@@ -17,7 +17,7 @@
 
 package org.apache.flink.streaming.connectors.redis.common.hanlder;
 
-import java.util.Map;
+import org.apache.flink.configuration.ReadableConfig;
 import org.apache.flink.streaming.connectors.redis.common.config.FlinkJedisConfigBase;
 
 /**
@@ -27,8 +27,8 @@ public interface FlinkJedisConfigHandler extends RedisHandler  {
 
     /**
      * create flink jedis config use sepecified properties.
-     * @param properties used to create flink jedis config
+     * @param config used to create flink jedis config
      * @return flink jedis config
      */
-    FlinkJedisConfigBase createFlinkJedisConfig(Map<String, String> properties);
+    FlinkJedisConfigBase createFlinkJedisConfig(ReadableConfig config);
 }

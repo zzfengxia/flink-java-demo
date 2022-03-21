@@ -21,16 +21,18 @@ import org.apache.flink.configuration.ReadableConfig;
 import org.apache.flink.streaming.connectors.redis.common.mapper.RedisCommand;
 
 /**
- * SADD  operation redis mapper.
+ * HSET operation redis mapper.
  */
-public class SAddMapper extends RowRedisMapper {
+public class HGetMapper extends RowRedisMapper {
 
-    public SAddMapper() {
-        super(RedisCommand.SADD);
+    public HGetMapper() {
+        super(RedisCommand.HGET);
     }
 
-    public SAddMapper(ReadableConfig config) {
-        super(RedisCommand.SADD, config);
+
+    public HGetMapper(ReadableConfig config) {
+        super(RedisCommand.HGET, config);
     }
+
 
 }

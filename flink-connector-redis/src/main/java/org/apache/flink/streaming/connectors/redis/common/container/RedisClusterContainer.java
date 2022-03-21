@@ -33,7 +33,7 @@ public class RedisClusterContainer implements RedisCommandsContainer, Closeable 
 
     private static final Logger LOG = LoggerFactory.getLogger(RedisClusterContainer.class);
 
-    private transient JedisCluster jedisCluster;
+    protected transient JedisCluster jedisCluster;
 
     /**
      * Initialize Redis command container for Redis cluster.
@@ -73,9 +73,10 @@ public class RedisClusterContainer implements RedisCommandsContainer, Closeable 
     }
 
     @Override
-    public void hincrBy(final String key, final String hashField, final Long value, final Integer ttl) {
+    public long hincrBy(final String key, final String hashField, final Long value, final Integer ttl) {
+        Long result;
         try {
-            jedisCluster.hincrBy(key, hashField, value);
+            result = jedisCluster.hincrBy(key, hashField, value);
             if (ttl != null) {
                 jedisCluster.expire(key, ttl);
             }
@@ -86,6 +87,26 @@ public class RedisClusterContainer implements RedisCommandsContainer, Closeable 
             }
             throw e;
         }
+        return result;
+    }
+
+
+    @Override
+    public Double hincrByFloat(final String key, final String hashField, final Double value, final Integer ttl) {
+        Double result;
+        try {
+            result = jedisCluster.hincrByFloat(key.getBytes(), hashField.getBytes(), value);
+            if (ttl != null) {
+                jedisCluster.expire(key, ttl);
+            }
+        } catch (Exception e) {
+            if (LOG.isErrorEnabled()) {
+                LOG.error("Cannot send Redis message with command HINCRBY to hash {} of key {} error message {}",
+                        hashField, key, e.getMessage());
+            }
+            throw e;
+        }
+        return result;
     }
 
     @Override
@@ -167,6 +188,19 @@ public class RedisClusterContainer implements RedisCommandsContainer, Closeable 
     }
 
     @Override
+    public String get(final String key) {
+        try {
+            return jedisCluster.get(key);
+        } catch (Exception e) {
+            if (LOG.isErrorEnabled()) {
+                LOG.error("Cannot send Redis message with command SETEX to key {} error message {}",
+                        key, e.getMessage());
+            }
+            throw e;
+        }
+    }
+
+    @Override
     public void pfadd(final String key, final String element) {
         try {
             jedisCluster.pfadd(key, element);
@@ -219,9 +253,10 @@ public class RedisClusterContainer implements RedisCommandsContainer, Closeable 
     }
 
     @Override
-    public void incrByEx(String key, Long value, Integer ttl) {
+    public Long incrByEx(String key, Long value, Integer ttl) {
+        Long result;
         try {
-            jedisCluster.incrBy(key, value);
+            result = jedisCluster.incrBy(key, value);
             if (ttl != null) {
                 jedisCluster.expire(key, ttl);
             }
@@ -232,6 +267,7 @@ public class RedisClusterContainer implements RedisCommandsContainer, Closeable 
             }
             throw e;
         }
+        return result;
     }
 
     @Override
@@ -257,7 +293,7 @@ public class RedisClusterContainer implements RedisCommandsContainer, Closeable 
             jedisCluster.incrBy(key, value);
         } catch (Exception e) {
             if (LOG.isErrorEnabled()) {
-                LOG.error("Cannot send Redis message with command incrby to key {} with increment {} error message {}",
+                LOG.error("Cannot send Redis message with command incrby to key {} with increment {} and tll {} error message {}",
                         key, value, e.getMessage());
             }
             throw e;
@@ -286,4 +322,148 @@ public class RedisClusterContainer implements RedisCommandsContainer, Closeable 
         this.jedisCluster.close();
     }
 
+    @Override
+    public void setbit(String key, long offset, boolean value) {
+        try {
+            jedisCluster.setbit(key, offset, value);
+        } catch (Exception e) {
+            if (LOG.isErrorEnabled()) {
+                LOG.error("Cannot send Redis message with command setbit to key {} with value {} and offset {} error message {}",
+                        key, value, offset, e.getMessage());
+            }
+            throw e;
+        }
+    }
+
+    @Override
+    public boolean getbit(String key, long offset) {
+        try {
+            return jedisCluster.getbit(key, offset);
+        } catch (Exception e) {
+            if (LOG.isErrorEnabled()) {
+                LOG.error("Cannot send Redis message with command getbit to key {} with offset {} error message {}",
+                        key, offset, e.getMessage());
+            }
+            throw e;
+        }
+    }
+
+    @Override
+    public String hget(String key, String field) {
+        try {
+            return jedisCluster.hget(key, field);
+        } catch (Exception e) {
+            if (LOG.isErrorEnabled()) {
+                LOG.error("Cannot send Redis message with command hget to key {} with field {} error message {}",
+                        key, field, e.getMessage());
+            }
+            throw e;
+        }
+    }
+
+    @Override
+    public void hdel(String key, String field) {
+        try {
+            jedisCluster.hdel(key, field);
+        } catch (Exception e) {
+            if (LOG.isErrorEnabled()) {
+                LOG.error("Cannot send Redis message with command hget to key {} with field {} error message {}",
+                        key, field, e.getMessage());
+            }
+            throw e;
+        }
+    }
+
+    @Override
+    public boolean hexists(String key, String field) {
+        try {
+            return jedisCluster.hexists(key, field);
+        } catch (Exception e) {
+            if (LOG.isErrorEnabled()) {
+                LOG.error("Cannot send Redis message with command hexists to key {} with field {} error message {}",
+                        key, field, e.getMessage());
+            }
+            throw e;
+        }
+    }
+
+    @Override
+    public boolean exists(String key) {
+        try {
+            return jedisCluster.exists(key);
+        } catch (Exception e) {
+            if (LOG.isErrorEnabled()) {
+                LOG.error("Cannot send Redis message with command exists to key {} error message {}",
+                        key, e.getMessage());
+            }
+            throw e;
+        }
+    }
+
+    @Override
+    public Long expire(String key, int seconds) {
+
+        try {
+            return jedisCluster.expire(key, seconds);
+        } catch (Exception e) {
+            if (LOG.isErrorEnabled()) {
+                LOG.error("Cannot send Redis message with command exists to key {}  seconds {} error message {}",
+                        key, seconds, e.getMessage());
+            }
+            throw e;
+        }
+    }
+
+    @Override
+    public boolean sismember(String key, String member) {
+        try {
+            return jedisCluster.sismember(key, member);
+        } catch (Exception e) {
+            if (LOG.isErrorEnabled()) {
+                LOG.error("Cannot send Redis message with command exists to key {}  member {} error message {}",
+                        key, member, e.getMessage());
+            }
+            throw e;
+        }
+    }
+
+    @Override
+    public long scard(String key) {
+        try {
+            return jedisCluster.scard(key);
+        } catch (Exception e) {
+            if (LOG.isErrorEnabled()) {
+                LOG.error("Cannot send Redis message with command scard to key {}  error message {}",
+                        key, e.getMessage());
+            }
+            throw e;
+        }
+    }
+
+    @Override
+    public void srem(String setName, String value)  {
+        try {
+             jedisCluster.srem(setName, value);
+        } catch (Exception e) {
+            if (LOG.isErrorEnabled()) {
+                LOG.error("Cannot send Redis message with command srem to setName {} with value {} error message {}",
+                        setName, value, e.getMessage());
+            }
+            throw e;
+        }
+    }
+
+    @Override
+    public long incrByLong(String key, long value){
+        long result = 0;
+        try {
+            result = jedisCluster.incrBy(key, value);
+        } catch (Exception e) {
+            if(LOG.isErrorEnabled()) {
+                LOG.error("Cannot send Redis message with command incrBy to key {} and value {} error message {}", new Object[]{key, value, e.getMessage()});
+            }
+            throw e;
+        }
+        return result;
+    }
 }

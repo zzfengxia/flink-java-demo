@@ -17,6 +17,11 @@
 
 package org.apache.flink.streaming.connectors.redis.common.hanlder;
 
+import org.apache.flink.table.api.TableException;
+import org.apache.flink.util.Preconditions;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -25,10 +30,6 @@ import java.util.Optional;
 import java.util.ServiceConfigurationError;
 import java.util.ServiceLoader;
 import java.util.stream.Collectors;
-import org.apache.flink.table.api.TableException;
-import org.apache.flink.util.Preconditions;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Unified class to search for a {@link RedisHandler} of provided type and properties.

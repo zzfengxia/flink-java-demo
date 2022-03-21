@@ -17,32 +17,33 @@
 
 package org.apache.flink.streaming.connectors.redis.common.config.handler;
 
-import static org.apache.flink.streaming.connectors.redis.descriptor.RedisValidator.REDIS_MASTER_NAME;
-import static org.apache.flink.streaming.connectors.redis.descriptor.RedisValidator.REDIS_MODE;
-import static org.apache.flink.streaming.connectors.redis.descriptor.RedisValidator.REDIS_SENTINEL;
-import static org.apache.flink.streaming.connectors.redis.descriptor.RedisValidator.SENTINELS_INFO;
-import static org.apache.flink.streaming.connectors.redis.descriptor.RedisValidator.SENTINELS_PASSWORD;
+import org.apache.flink.calcite.shaded.com.google.common.base.Preconditions;
+import org.apache.flink.configuration.ReadableConfig;
+import org.apache.flink.streaming.connectors.redis.common.config.FlinkJedisConfigBase;
+import org.apache.flink.streaming.connectors.redis.common.config.FlinkJedisSentinelConfig;
+import org.apache.flink.streaming.connectors.redis.common.config.RedisConnectorOptions;
+import org.apache.flink.streaming.connectors.redis.common.hanlder.FlinkJedisConfigHandler;
 
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
-import org.apache.flink.streaming.connectors.redis.common.config.FlinkJedisConfigBase;
-import org.apache.flink.streaming.connectors.redis.common.config.FlinkJedisSentinelConfig;
-import org.apache.flink.streaming.connectors.redis.common.hanlder.FlinkJedisConfigHandler;
+import java.util.stream.Collectors;
+
+import static org.apache.flink.streaming.connectors.redis.descriptor.RedisValidator.REDIS_MODE;
+import static org.apache.flink.streaming.connectors.redis.descriptor.RedisValidator.REDIS_SENTINEL;
 
 public class FlinkJedisSentinelConfigHandler implements FlinkJedisConfigHandler {
 
     @Override
-    public FlinkJedisConfigBase createFlinkJedisConfig(Map<String, String> properties) {
-        String masterName = properties.computeIfAbsent(REDIS_MASTER_NAME, null);
-        String sentinelsInfo = properties.computeIfAbsent(SENTINELS_INFO, null);
-        Objects.requireNonNull(masterName, "master should not be null in sentinel mode");
-        Objects.requireNonNull(sentinelsInfo, "sentinels should not be null in sentinel mode");
-        Set<String> sentinels = new HashSet<>(Arrays.asList(sentinelsInfo.split(",")));
-        String sentinelsPassword = properties.computeIfAbsent(SENTINELS_PASSWORD, null);
+    public FlinkJedisConfigBase createFlinkJedisConfig(ReadableConfig config) {
+        String masterName = config.get(RedisConnectorOptions.REDIS_MASTER_NAME);
+        String sentinelsInfo = config.get(RedisConnectorOptions.SENTINELS_INFO);
+        Preconditions.checkNotNull(masterName, "master should not be null in sentinel mode");
+        Preconditions.checkNotNull(sentinelsInfo, "sentinels should not be null in sentinel mode");
+        Set<String> sentinels = Arrays.asList(sentinelsInfo.split(","))
+                .stream().collect(Collectors.toSet());
+        String sentinelsPassword = config.get(RedisConnectorOptions.SENTINELS_PASSWORD);
         if (sentinelsPassword != null && sentinelsPassword.trim().isEmpty()) {
             sentinelsPassword = null;
         }
